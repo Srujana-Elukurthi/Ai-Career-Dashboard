@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+supabase
+python-dotenv
+bcrypt
+numpy
+scikit-learn
+joblib
+pdfplumber
+python-docx
+httpx
+cachetools
+python-multipart
+openai
+pymongo
