@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { API_BASE_URL } from "../config";
 import { Code, Trophy, TrendingUp, Calendar, ArrowLeft, ExternalLink } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -25,7 +26,7 @@ export function CodingScoreTracker({ onNavigate, profileData }: CodingScoreTrack
     setStats(null); // Clear previous stats so dashboard hides during loading/error
 
     try {
-      const response = await fetch(`http://localhost:8000/leetcode/${username}`);
+      const response = await fetch(`${API_BASE_URL}/leetcode/${username}`);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error_msg || "No username found on LeetCode");
@@ -35,10 +36,8 @@ export function CodingScoreTracker({ onNavigate, profileData }: CodingScoreTrack
       const data = await response.json();
 
       if (data.error_msg) {
-        setTimeout(() => {
-          setError(data.error_msg);
-          setLoading(false);
-        }, 300);
+        setError(data.error_msg);
+        setLoading(false);
         return;
       }
 
@@ -74,15 +73,11 @@ export function CodingScoreTracker({ onNavigate, profileData }: CodingScoreTrack
         }))
       };
 
-      setTimeout(() => {
-        setStats(updatedStats);
-        setLoading(false);
-      }, 300);
+      setStats(updatedStats);
+      setLoading(false);
     } catch (err: any) {
-      setTimeout(() => {
-        setError(err.message || "An error occurred");
-        setLoading(false);
-      }, 300);
+      setError(err.message || "An error occurred");
+      setLoading(false);
     }
   }, [username, loading, stats]);
 

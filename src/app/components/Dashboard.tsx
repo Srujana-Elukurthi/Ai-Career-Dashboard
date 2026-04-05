@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { API_BASE_URL } from "../config";
 import {
   Brain,
   TrendingUp,
@@ -33,7 +34,7 @@ export function Dashboard({
   onNavigate,
   onBack,
 }: DashboardProps) {
-  const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = API_BASE_URL;
 
   const [mlForm, setMlForm] = useState({
     coding_score: parseFloat(profileData.programmingScore) || 70,
@@ -136,18 +137,14 @@ export function Dashboard({
       if (!res.ok) {
         throw new Error(data?.detail || "Prediction failed");
       }
-      setTimeout(() => {
-        setMlResult({
-          prediction: data.prediction,
-          confidence: data.confidence,
-        });
-        setMlLoading(false);
-      }, 300);
+      setMlResult({
+        prediction: data.prediction,
+        confidence: data.confidence,
+      });
+      setMlLoading(false);
     } catch (err: any) {
-      setTimeout(() => {
-        setMlError(err?.message || "Unable to connect to backend");
-        setMlLoading(false);
-      }, 300);
+      setMlError(err?.message || "Unable to connect to backend");
+      setMlLoading(false);
     }
   }, [mlForm, mlLoading]);
 

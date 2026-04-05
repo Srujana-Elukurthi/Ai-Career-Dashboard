@@ -9,6 +9,7 @@ import {
 import Editor from "@monaco-editor/react";
 import { toast } from "sonner";
 import { Toaster } from "sonner";
+import { API_BASE_URL } from "../config";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Judge0 CE — Free public endpoint (no API key required)
@@ -1219,7 +1220,6 @@ export function CodeLab({ onNavigate, profileData }: CodeLabProps) {
       try {
         result = await runWithJudge0(code, language, stdin);
       } catch {
-        await new Promise((r) => setTimeout(r, 1200));
         result = { stdout: getMockOutput(code, language), stderr: "", compile_output: "", status: { id: 3, description: "Accepted (demo)" }, time: "0.089", memory: 4096 };
       }
 
@@ -1290,7 +1290,7 @@ export function CodeLab({ onNavigate, profileData }: CodeLabProps) {
       setIsExplaining(true);
       setRightTab("ai");
 
-      const res = await fetch("http://127.0.0.1:8000/explain", {
+      const res = await fetch(`${API_BASE_URL}/explain`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -1300,21 +1300,17 @@ export function CodeLab({ onNavigate, profileData }: CodeLabProps) {
 
       const data = await res.json();
 
-      setTimeout(() => {
-        if (data.error) {
-          setAiExplanation("❌ " + data.error);
-        } else {
-          setAiExplanation(data.result);
-        }
-        setIsExplaining(false);
-      }, 300);
+      if (data.error) {
+        setAiExplanation("❌ " + data.error);
+      } else {
+        setAiExplanation(data.result);
+      }
+      setIsExplaining(false);
 
     } catch (err) {
       console.error(err);
-      setTimeout(() => {
-        setAiExplanation("❌ Backend connection failed");
-        setIsExplaining(false);
-      }, 300);
+      setAiExplanation("❌ Backend connection failed");
+      setIsExplaining(false);
     }
   }, [code, isExplaining]);
 
@@ -1330,7 +1326,7 @@ export function CodeLab({ onNavigate, profileData }: CodeLabProps) {
       setIsFixing(true);
       setRightTab("ai");
 
-      const res = await fetch("http://127.0.0.1:8000/fix", {
+      const res = await fetch(`${API_BASE_URL}/fix`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -1340,21 +1336,17 @@ export function CodeLab({ onNavigate, profileData }: CodeLabProps) {
 
       const data = await res.json();
 
-      setTimeout(() => {
-        if (data.error) {
-          setFixSuggestions(["❌ " + data.error]);
-        } else {
-          setFixSuggestions([data.result]);
-        }
-        setIsFixing(false);
-      }, 300);
+      if (data.error) {
+        setFixSuggestions(["❌ " + data.error]);
+      } else {
+        setFixSuggestions([data.result]);
+      }
+      setIsFixing(false);
 
     } catch (err) {
       console.error(err);
-      setTimeout(() => {
-        setFixSuggestions(["❌ Backend connection failed"]);
-        setIsFixing(false);
-      }, 300);
+      setFixSuggestions(["❌ Backend connection failed"]);
+      setIsFixing(false);
     }
   }, [code, isFixing]);
 
@@ -1370,7 +1362,7 @@ export function CodeLab({ onNavigate, profileData }: CodeLabProps) {
       setIsAnalyzing(true);
       setRightTab("ai");
 
-      const res = await fetch("http://127.0.0.1:8000/complexity", {
+      const res = await fetch(`${API_BASE_URL}/complexity`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -1380,22 +1372,18 @@ export function CodeLab({ onNavigate, profileData }: CodeLabProps) {
 
       const data = await res.json();
 
-      setTimeout(() => {
-        if (data.error) {
-          setComplexity(null);
-          setAiExplanation("❌ " + data.error);
-        } else {
-          setComplexity(data.result);
-        }
-        setIsAnalyzing(false);
-      }, 300);
+      if (data.error) {
+        setComplexity(null);
+        setAiExplanation("❌ " + data.error);
+      } else {
+        setComplexity(data.result);
+      }
+      setIsAnalyzing(false);
 
     } catch (err) {
       console.error(err);
-      setTimeout(() => {
-        setAiExplanation("❌ Backend connection failed");
-        setIsAnalyzing(false);
-      }, 300);
+      setAiExplanation("❌ Backend connection failed");
+      setIsAnalyzing(false);
     }
   }, [code, isAnalyzing]);
 

@@ -76,25 +76,21 @@ export function MockInterviewChat({ onNavigate, profileData }: MockInterviewChat
 
           setAskedQuestions(prev => new Set(prev).add(selected));
 
-          setTimeout(() => {
-            setMessages(prev => [...prev, {
-              id: Date.now().toString(),
-              sender: "ai",
-              content: `Great! Let's do a ${match} question:\n\n${selected}`,
-              timestamp: new Date()
-            }]);
-            setLoading(false);
-          }, 300);
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            sender: "ai",
+            content: `Great! Let's do a ${match} question:\n\n${selected}`,
+            timestamp: new Date()
+          }]);
+          setLoading(false);
         } else {
-          setTimeout(() => {
-            setMessages(prev => [...prev, {
-              id: Date.now().toString(),
-              sender: "ai",
-              content: "Please select a valid category: Technical, Behavioral, HR, or Coding.",
-              timestamp: new Date()
-            }]);
-            setLoading(false);
-          }, 300);
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            sender: "ai",
+            content: "Please select a valid category: Technical, Behavioral, HR, or Coding.",
+            timestamp: new Date()
+          }]);
+          setLoading(false);
         }
         return;
       }
@@ -108,55 +104,49 @@ export function MockInterviewChat({ onNavigate, profileData }: MockInterviewChat
         if (result.strengths.length > 0) aiResponse += `✅ **Strengths:** ${result.strengths.join(" ")}\n`;
         if (result.improvements.length > 0) aiResponse += `💡 **Improvements:** ${result.improvements.join(" ")}\n`;
 
-        setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          sender: "ai",
+          content: aiResponse,
+          timestamp: new Date()
+        }]);
+
+        // Optional Follow up logic chaining
+        if (!isFollowUp && result.rating >= 7) {
+          const followUpQ = generateFollowUp(textToSend, category);
+          setIsFollowUp(true);
           setMessages(prev => [...prev, {
-            id: Date.now().toString(),
+            id: (Date.now() + 1).toString(),
             sender: "ai",
-            content: aiResponse,
+            content: followUpQ,
             timestamp: new Date()
           }]);
-
-          // Optional Follow up logic chaining
-          setTimeout(() => {
-            if (!isFollowUp && result.rating >= 7) {
-              const followUpQ = generateFollowUp(textToSend, category);
-              setIsFollowUp(true);
-              setMessages(prev => [...prev, {
-                id: (Date.now() + 1).toString(),
-                sender: "ai",
-                content: followUpQ,
-                timestamp: new Date()
-              }]);
-            } else {
-              setIsFollowUp(false);
-              setStage("menu");
-              setCategory(null);
-              setMessages(prev => [...prev, {
-                id: (Date.now() + 1).toString(),
-                sender: "ai",
-                content: "Would you like to try another question? Just tell me the category (Technical, Behavioral, HR, Coding).",
-                timestamp: new Date()
-              }]);
-            }
-            setLoading(false);
-          }, 500); // Small extra delay for the follow up
-        }, 300);
+        } else {
+          setIsFollowUp(false);
+          setStage("menu");
+          setCategory(null);
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            sender: "ai",
+            content: "Would you like to try another question? Just tell me the category (Technical, Behavioral, HR, Coding).",
+            timestamp: new Date()
+          }]);
+        }
+        setLoading(false);
       }
 
     } catch (error) {
       console.error("Local Engine Error:", error);
-      setTimeout(() => {
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            sender: "ai",
-            content: "Oops! An error occurred analyzing your answer.",
-            timestamp: new Date()
-          }
-        ]);
-        setLoading(false);
-      }, 300);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: "ai",
+          content: "Oops! An error occurred analyzing your answer.",
+          timestamp: new Date()
+        }
+      ]);
+      setLoading(false);
     }
   }, [input, loading, stage, category, askedQuestions, isFollowUp]);
 

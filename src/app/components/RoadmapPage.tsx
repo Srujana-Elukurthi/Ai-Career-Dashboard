@@ -1,6 +1,7 @@
 import { Brain, ArrowLeft, Calendar, CheckCircle2, Circle, BookOpen, Code, Database, Users, Award, Building2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
+import { API_BASE_URL } from "../config";
 
 interface RoadmapPageProps {
   profileData: any;
@@ -67,7 +68,7 @@ export function RoadmapPage({ profileData, onNavigate }: RoadmapPageProps) {
       
       const fetchPromises = companies.map(async (company) => {
         try {
-          const res = await fetch("http://localhost:8000/generate-roadmap", {
+          const res = await fetch(`${API_BASE_URL}/generate-roadmap`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

@@ -10,7 +10,7 @@ import requests
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
@@ -100,7 +100,7 @@ class RoadmapRequest(BaseModel):
     communicationScore: float
     aptitudeScore: float
     targetCompany: str = "general"
-    userId: str = None  # New field for caching
+    userId: Optional[str] = None  # New field for caching
 
 
 readiness_model = None
@@ -137,33 +137,62 @@ async def generate_roadmap(request: RoadmapRequest):
         is_data_analyst = "data" in req.careerGoal.lower()
         company = req.targetCompany.lower() if req.targetCompany else "general"
         
-        # --- STRICT DIFFERENTIATION Content ---
         if company == "amazon":
-            # Focus: DSA Medium/Hard + System Design + Leadership Principles
-            titles = ["Arrays & HashMaps", "Strings & Sliding Window", "Stacks, Queues & Lists", "Trees & Recursion", "Graphs & BFS/DFS", "Dynamic Programming", "System Design Basics", "Amazon Leadership Principles"]
-            focuses = ["Complexity & Efficiency", "Pattern Recognition", "Data Struct Mastery", "Recursive Thinking", "Graph Traversal", "Optimized Solving", "HLD/LLD Scalability", "Behavioral (STAR Method)"]
+            weeks = [
+                {"week": 1, "title": "Arrays & Strings Mastery", "focus": "Two pointers, Sliding Window, and Prefix Sums.", "topics": ["Two pointers", "Sliding Window", "String Manipulation"], "practice": "LeetCode: 5 Easy, 10 Medium (e.g., Two Sum, Valid Palindrome).", "status": "upcoming"},
+                {"week": 2, "title": "Linked Lists & HashMaps", "focus": "Fast/Slow pointers and O(1) lookups.", "topics": ["Cycle Detection", "LRU Cache basics", "Hash Collisions"], "practice": "LeetCode: 10 Medium (e.g., LRU Cache, Merge K Sorted Lists).", "status": "upcoming"},
+                {"week": 3, "title": "Trees, Tries & Binary Search", "focus": "BSTs, Traversal, and Search Algorithms.", "topics": ["DFS/BFS", "LCA", "Trie Insert/Search"], "practice": "LeetCode/GeeksforGeeks: 10 Medium/Hard Tree Problems.", "status": "upcoming"},
+                {"week": 4, "title": "Graph Algorithms", "focus": "Shortest path, Matrix DFS, and Topological Sort.", "topics": ["Dijkstra", "Flood Fill", "Topological Sort"], "practice": "LeetCode: Number of Islands, Course Schedule.", "status": "upcoming"},
+                {"week": 5, "title": "Dynamic Programming", "focus": "Memoization, Tabulation, Knapsack patterns.", "topics": ["1D/2D DP", "Knapsack", "Longest Common Subsequence"], "practice": "LeetCode: Climbing Stairs, Coin Change, Edit Distance.", "status": "upcoming"},
+                {"week": 6, "title": "Low-Level System Design (LLD)", "focus": "OOD, Design Patterns, and API Design.", "topics": ["Singleton & Factory", "SOLID Principles", "REST API Design"], "practice": "Educative.io / GitHub Repo: Design Parking Lot or Library Management System.", "status": "upcoming"},
+                {"week": 7, "title": "High-Level System Design (HLD)", "focus": "Scalability, Microservices, and Databases.", "topics": ["Load Balancing", "Caching", "Database Sharding"], "practice": "System Design Primer: Design Netflix or Twitter.", "status": "upcoming"},
+                {"week": 8, "title": "Amazon Leadership Principles", "focus": "Behavioral STAR method mapped to LPs.", "topics": ["Customer Obsession", "Ownership", "Deliver Results"], "practice": "Pramp/Mock Interviews: Practice 5 STAR stories.", "status": "upcoming"}
+            ]
         elif company == "tcs":
-            # Focus: Aptitude + Coding Basics + Verbal
-            titles = ["Quantitative Aptitude I", "Logical Reasoning I", "Verbal Ability I", "Quantitative Aptitude II", "Logical Reasoning II", "Programming Basics (C/Java)", "Data Structures (Basic)", "TCS NQT Full Mock Prep"]
-            focuses = ["Number System/Ratio", "Series/Coding-Decoding", "Grammar/Comprehension", "Permutation/Probability", "Syllogisms/Blood Rels", "Loops & Arrays", "Linear Data Structs", "NQT Pattern Practice"]
+            weeks = [
+                {"week": 1, "title": "Quantitative Aptitude: Number Systems", "focus": "Arithmetic fundamentals and calculation speed.", "topics": ["Fractions", "Divisibility", "LCM/HCF"], "practice": "IndiaBix: Solve 50 Number System questions.", "status": "upcoming"},
+                {"week": 2, "title": "Quantitative Aptitude: Advanced", "focus": "Word problems and mathematical logic.", "topics": ["Time & Work", "Ratios", "Probability"], "practice": "IndiaBix / PrepInsta: Solve 30 Time & Work, 20 Probability questions.", "status": "upcoming"},
+                {"week": 3, "title": "Logical Reasoning: Patterns", "focus": "Abstract thinking and pattern recognition.", "topics": ["Number Series", "Coding-Decoding", "Visual Reasoning"], "practice": "HackerRank: 20 Pattern matching problems. IndiaBix: 30 Logical Series.", "status": "upcoming"},
+                {"week": 4, "title": "Logical Reasoning: Deductions", "focus": "Rule-based logic and relationship deductions.", "topics": ["Blood Relations", "Syllogisms", "Seating Arrangement"], "practice": "PrepInsta: 15 Seating arrangements, 20 Syllogisms.", "status": "upcoming"},
+                {"week": 5, "title": "Verbal Ability", "focus": "Grammar, Vocabulary, and Comprehension.", "topics": ["Reading Comprehension", "Synonyms/Antonyms", "Error Spotting"], "practice": "IndiaBix: 5 RC Passages, 50 Grammar questions.", "status": "upcoming"},
+                {"week": 6, "title": "Foundation Coding", "focus": "C/C++/Java basic syntax and loops.", "topics": ["Loops & Conditionals", "Arrays", "Functions"], "practice": "HackerRank: Complete 'C/Java/C++ Track' (Easy level 20 questions).", "status": "upcoming"},
+                {"week": 7, "title": "Intermediate Coding", "focus": "TCS Digital coding patterns.", "topics": ["String Manipulation", "Matrix Operations", "Basic Sorting"], "practice": "TCS NQT Previous Year Papers: Solve 5 complete coding sections.", "status": "upcoming"},
+                {"week": 8, "title": "Full Pattern Mock Tests", "focus": "Time management and complete prep.", "topics": ["Full NQT Mock", "HR Interview prep", "Technical HR Resume walkthrough"], "practice": "Take 3 full-length timed mock tests.", "status": "upcoming"}
+            ]
         elif company == "deloitte":
-            # Focus: Case Studies + Analytics + Business Comm
-            titles = ["Business Communication", "Quant & Data Interpretation", "Logical Puzzles", "Excel for Analytics", "SQL & DBMS Basics", "Deloitte Case Study Prep", "Situational Judgment", "Interaction & GD Skills"]
-            focuses = ["Email & Professionalism", "Data Analysis Tips", "Problem Solving", "Data Manipulation", "Querying & Storage", "Business Logic Scenarios", "Workplace Ethics", "Public Speaking/Presenting"]
-        else: # General
-            titles = ["Programming Fundamentals", "Basic Data Structures", "SQL & Databases", "Project Phase I", "Web/App Dev Core", "Project Phase II", "Aptitude Fundamentals", "Mock Interview Mastery"]
-            focuses = ["Syntax & Logic", "Arrays & Strings", "CRUD Operations", "Requirement Specs", "Feature Development", "Testing & Refactoring", "Speed & Accuracy", "Confidence & Presence"]
-
-        weeks = []
-        for i in range(1, 9):
-            weeks.append({
-                "week": i,
-                "title": titles[i-1],
-                "focus": focuses[i-1],
-                "topics": [f"{titles[i-1]} Basics", "Implementation", f"Special {company.capitalize()} Module"],
-                "practice": "15 Practice Problems" if not is_data_analyst else "2 Data Projects",
-                "status": "upcoming"
-            })
+            weeks = [
+                {"week": 1, "title": "Corporate Communication", "focus": "Professional tone and email etiquette.", "topics": ["Email Drafting", "Client Scenarios", "Active Listening"], "practice": "Draft 5 mock status-update and escalation emails.", "status": "upcoming"},
+                {"week": 2, "title": "Analytical Puzzles", "focus": "Spatial and logical problem solving.", "topics": ["Data Interpretation", "Visual puzzles", "Critical Reasoning"], "practice": "IndiaBix: 40 Data Interpretation (Graphs/Charts).", "status": "upcoming"},
+                {"week": 3, "title": "Core SQL", "focus": "Data retrieval and aggregation.", "topics": ["SELECT/WHERE", "GROUP BY", "JOINs"], "practice": "HackerRank (SQL): Complete 20 Easy/Medium queries.", "status": "upcoming"},
+                {"week": 4, "title": "Advanced Logic & Excel", "focus": "Business logic applications.", "topics": ["Advanced Excel (VLOOKUP, Pivot)", "Subqueries", "Window Functions"], "practice": "LeetCode (DB): 10 Medium SQL Problems. Build 1 Excel Dashboard.", "status": "upcoming"},
+                {"week": 5, "title": "Software Engineering Foundations", "focus": "SDLC and Agile methodologies.", "topics": ["Agile vs Waterfall", "Scrum basics", "JIRA workflow"], "practice": "Review Atlassian Agile guides.", "status": "upcoming"},
+                {"week": 6, "title": "Case Study Methodologies", "focus": "Deconstructing business problems.", "topics": ["Root Cause Analysis", "Process Mapping", "Cost-Benefit Analysis"], "practice": "Solve 2 Consulting Case Studies (e.g., from Case in Point).", "status": "upcoming"},
+                {"week": 7, "title": "Situational Judgment", "focus": "Workplace ethics and conflict resolution.", "topics": ["Conflict Management", "Prioritization", "Stakeholder Management"], "practice": "Review 5 common workplace scenario interview questions.", "status": "upcoming"},
+                {"week": 8, "title": "Group Discussions & HR", "focus": "Presentations and team dynamics.", "topics": ["GD Strategies", "Structuring Arguments", "Resume Presentation"], "practice": "Participate in 2 peer-to-peer GD mocks.", "status": "upcoming"}
+            ]
+        else:
+            if is_data_analyst:
+                weeks = [
+                    {"week": 1, "title": "Python for Data Fundamentals", "focus": "Pandas, NumPy, and Data Manipulation.", "topics": ["DataFrames", "Cleaning Missing Data", "Aggregations"], "practice": "Kaggle: Complete Pandas micro-course. 5 basic EDA tasks.", "status": "upcoming"},
+                    {"week": 2, "title": "SQL Deep Dive", "focus": "Complex queries and subqueries.", "topics": ["Window Functions", "CTEs", "Performance Optimization"], "practice": "LeetCode/HackerRank: 20 Medium/Hard SQL problems.", "status": "upcoming"},
+                    {"week": 3, "title": "Data Visualization", "focus": "Storytelling with Data using Matplotlib/Seaborn/Tableau.", "topics": ["Chart Selection", "Dashboard Design", "Interactive Plots"], "practice": "Build 1 interactive dashboard in Tableau or PowerBI.", "status": "upcoming"},
+                    {"week": 4, "title": "Statistics & A/B Testing", "focus": "Hypothesis testing and distributions.", "topics": ["P-values", "Normal Distribution", "T-Tests"], "practice": "Solve 10 stats probability questions using Python.", "status": "upcoming"},
+                    {"week": 5, "title": "Machine Learning Basics", "focus": "Predictive modeling concepts.", "topics": ["Linear Regression", "Classification", "Train/Test Split"], "practice": "Kaggle: Titanic Dataset or House Prices competition.", "status": "upcoming"},
+                    {"week": 6, "title": "Advanced Analytics Projects", "focus": "End-to-end data pipelines.", "topics": ["Data Engineering basics", "ETL pipelines", "Automated Reporting"], "practice": "Build an end-to-end sentiment analysis pipeline.", "status": "upcoming"},
+                    {"week": 7, "title": "Case Studies & Product Sense", "focus": "Business metric definitions.", "topics": ["Product Metrics (DAU/MAU)", "Churn Analysis", "Cohort Analysis"], "practice": "Analyze an open dataset to find retention drops.", "status": "upcoming"},
+                    {"week": 8, "title": "Portfolio & Interview Prep", "focus": "Presentation and behavioral questions.", "topics": ["Project Walkthrough", "Technical Communication", "Mock Interviews"], "practice": "Present a project to a peer. 2 complete mock interviews.", "status": "upcoming"}
+                ]
+            else:
+                weeks = [
+                    {"week": 1, "title": "Programming Fundamentals Review", "focus": "Syntax, Control Flow, and OOP basics.", "topics": ["Data Types", "Loops", "Classes & Objects"], "practice": "HackerRank: 30 syntax/basic logic challenges.", "status": "upcoming"},
+                    {"week": 2, "title": "Core Data Structures", "focus": "Arrays, Linked Lists, Stacks, Queues.", "topics": ["Array Manipulation", "Pointer Basics", "LIFO/FIFO logic"], "practice": "LeetCode: 15 Easy, 5 Medium Array/String problems.", "status": "upcoming"},
+                    {"week": 3, "title": "Standard Algorithms", "focus": "Sorting, Searching, and complexity analysis.", "topics": ["Binary Search", "Merge/Quick Sort", "Big O Notation"], "practice": "LeetCode: 10 Binary Search problems.", "status": "upcoming"},
+                    {"week": 4, "title": "Database Design & SQL", "focus": "Relational DBs and basic querying.", "topics": ["Joins", "Normalization", "CRUD"], "practice": "HackerRank: Complete Basic SQL certification problems.", "status": "upcoming"},
+                    {"week": 5, "title": "Backend/Frontend Integration", "focus": "Building APIs and connecting UI.", "topics": ["REST APIs", "JSON/HTTP Protocol", "State Management"], "practice": "Build a Simple Full-Stack Todo App.", "status": "upcoming"},
+                    {"week": 6, "title": "Version Control & Testing", "focus": "Git flows and unit testing logic.", "topics": ["Git Branching/Merging", "Unit Tests", "Debugging Techniques"], "practice": "Write Unit Tests for the Todo App. Setup CI/CD.", "status": "upcoming"},
+                    {"week": 7, "title": "System Design Basics", "focus": "Understanding scalability at a high level.", "topics": ["Monolith vs Microservices", "Caching", "Load Balancing"], "practice": "System Design Primer: Read top 3 architectures.", "status": "upcoming"},
+                    {"week": 8, "title": "Behavioral & Final Polish", "focus": "Resume walkthrough and HR questions.", "topics": ["STAR Method", "Strengths/Weaknesses", "Mock HR Round"], "practice": "Pramp: 2 Mock Interviews. Draft answers for top 10 HR questions.", "status": "upcoming"}
+                ]
         return {"weeks": weeks}
 
     # 2. Cache Check (Supabase)
@@ -223,20 +252,24 @@ async def generate_roadmap(request: RoadmapRequest):
     }}
     """
 
-    # Try GPT-4o first, fallback to GPT-3.5 if needed
-    models_to_try = ["gpt-4o", "gpt-3.5-turbo"]
+    # Use a single fast model with short time out to quickly jump to offline fallback
+    models_to_try = ["gpt-4o-mini"]
     last_error = None
 
     for model in models_to_try:
         try:
             print(f"DEBUG: Attempting roadmap generation with {model}...")
-            response = await openai_client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": "You are a professional career coach and expert technical recruiter."},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={"type": "json_object"}
+            import asyncio
+            response = await asyncio.wait_for(
+                openai_client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": "You are a professional career coach and expert technical recruiter."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    response_format={"type": "json_object"}
+                ),
+                timeout=2.5
             )
             
             result = json.loads(response.choices[0].message.content)

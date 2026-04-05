@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { API_BASE_URL } from "../config";
 import { Flame, Target, Calendar, TrendingUp, Award, ArrowLeft, Check, Search } from "lucide-react";
 
 interface ProgressTrackerProps {
@@ -37,7 +38,7 @@ export function ProgressTracker({ onNavigate, profileData }: ProgressTrackerProp
     setError("");
 
     try {
-      const response = await fetch(`http://localhost:8000/leetcode/${username}`);
+      const response = await fetch(`${API_BASE_URL}/leetcode/${username}`);
       if (!response.ok) {
         throw new Error("Failed to fetch data or user not found.");
       }
@@ -45,27 +46,21 @@ export function ProgressTracker({ onNavigate, profileData }: ProgressTrackerProp
       const data = await response.json();
 
       if (data.error_msg) {
-        setTimeout(() => {
-          setError(data.error_msg);
-          setLoading(false);
-        }, 300);
+        setError(data.error_msg);
+        setLoading(false);
         return;
       }
 
-      setTimeout(() => {
-        setStats(data);
+      setStats(data);
 
-        // Dynamic daily goal computation based on today's submission count
-        const todayCount = data.recent_activity && data.recent_activity.length > 0 ? data.recent_activity[0].count : 0;
-        setDailyGoals(prev => prev.map(g => g.id === "1" ? { ...g, completed: todayCount >= 3 } : g));
+      // Dynamic daily goal computation based on today's submission count
+      const todayCount = data.recent_activity && data.recent_activity.length > 0 ? data.recent_activity[0].count : 0;
+      setDailyGoals(prev => prev.map(g => g.id === "1" ? { ...g, completed: todayCount >= 3 } : g));
 
-        setLoading(false);
-      }, 300);
+      setLoading(false);
     } catch (err: any) {
-      setTimeout(() => {
-        setError(err.message || "An error occurred");
-        setLoading(false);
-      }, 300);
+      setError(err.message || "An error occurred");
+      setLoading(false);
     }
   }, [username, loading]);
 

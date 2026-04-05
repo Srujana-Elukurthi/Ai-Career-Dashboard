@@ -1,4 +1,5 @@
 import { useState, useCallback, type ChangeEvent } from "react";
+import { API_BASE_URL } from "../config";
 import { Upload, FileText, CheckCircle, XCircle, AlertCircle, ArrowLeft, Target } from "lucide-react";
 
 interface ResumeAnalyzerProps {
@@ -17,7 +18,7 @@ interface ResumeAnalysis {
 }
 
 export function ResumeAnalyzer({ onNavigate, profileData }: ResumeAnalyzerProps) {
-  const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = API_BASE_URL;
   const [file, setFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<ResumeAnalysis | null>(null);
@@ -66,15 +67,11 @@ export function ResumeAnalyzer({ onNavigate, profileData }: ResumeAnalyzerProps)
         throw new Error(data?.detail || "Resume analysis failed.");
       }
 
-      setTimeout(() => {
-        setAnalysis(data.analysis as ResumeAnalysis);
-        setAnalyzing(false);
-      }, 300);
+      setAnalysis(data.analysis as ResumeAnalysis);
+      setAnalyzing(false);
     } catch (err: any) {
-      setTimeout(() => {
-        setError(err?.message || "Unable to analyze resume right now.");
-        setAnalyzing(false);
-      }, 300);
+      setError(err?.message || "Unable to analyze resume right now.");
+      setAnalyzing(false);
     }
   }, [file, analyzing]);
 
