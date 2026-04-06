@@ -2,8 +2,6 @@
 
   # AI Career Readiness Dashboard
 
-  This is a code bundle for AI Career Readiness Dashboard. The original project is available at https://www.figma.com/design/YQVvJ6sAcfzwTrDGe1W3GO/AI-Career-Readiness-Dashboard.
-
   ## Running the code
 
   Run `npm i` to install the dependencies.
@@ -54,6 +52,6 @@ An AI-powered full-stack web application designed to help students prepare for p
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/AI-Career-Dashboard.git
+git clone https://github.com/Srujana-Elukurthi/AI-Career-Dashboard.git
 cd AI-Career-Dashboard
  dd6ecd05f840452304e16635770f7c577c95ee5f
